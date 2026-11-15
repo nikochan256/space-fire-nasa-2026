@@ -2,6 +2,10 @@
 
 **An interactive 3D archive of the hardware humanity left on the Moon, on Mars and in deep space, and two Skylab bases that repair it.**
 
+### 🚀 Live demo: **[spacefire-nasa-2026.vercel.app](https://spacefire-nasa-2026.vercel.app)**
+
+Jump straight in: [Shackleton Skylab (Moon)](https://spacefire-nasa-2026.vercel.app/explore/?a=sk-bay-moon) · [Arcadia Skylab (Mars)](https://spacefire-nasa-2026.vercel.app/explore/?a=sk-icehome) · [Apollo 15 moon buggy](https://spacefire-nasa-2026.vercel.app/explore/?a=a15-lrv) · [Ingenuity](https://spacefire-nasa-2026.vercel.app/explore/?a=ingenuity)
+
 Built for the **NASA Space Apps Challenge 2026**, challenge *[Abandoned but Not Forgotten: NASA's discarded equipment](https://www.spaceappschallenge.org/2026/challenges/nasas-discarded-equipment-storytelling/)*.
 
 Spacefire turns catalogue records (a name, a date, a pair of coordinates) into places you can visit. Fly across the solar system, land at the real coordinates of an Apollo site or a Mars rover, walk around the hardware at its real size, find out why it stopped working, then send it to a repair base on the Moon or Mars and bring it back to life.
