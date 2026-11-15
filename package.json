@@ -1,0 +1,8 @@
+{
+  "name": "spacefire",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Spacefire: an interactive 3D archive of the machines humanity left on the Moon, Mars and in deep space, with Skylab repair bases. NASA Space Apps Challenge 2026.",
+  "type": "module",
+  "scripts": { "start": "node scripts/serve.mjs 4179" }
+}

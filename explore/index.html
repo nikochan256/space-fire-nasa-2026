@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Spacefire Explorer — The Machines We Left Behind</title>
+  <meta name="description" content="An interactive 3D map of the hardware NASA left on the Moon, on Mars and in deep space.">
+  <meta name="theme-color" content="#05060b">
+  <link rel="icon" type="image/svg+xml" href="../assets/meta/spacefire.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/meta/favicon-32x32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="../assets/meta/apple-touch-icon.png">
+  <link rel="manifest" href="../assets/meta/site.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@200..700&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="explore.css">
+  <script type="importmap">{ "imports": { "three": "../shared/vendor/three.module.min.js", "three/addons/": "./vendor/" } }</script>
+</head>
+<body>
+  <canvas id="scene" aria-label="3D map of the solar system with NASA hardware"></canvas>
+  <div class="labels" id="labels"></div>
+
+  <!-- top bar -->
+  <header class="top">
+    <a class="back" href="/" id="back"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg><span><em>Space</em>fire</span></a>
+    <div class="crumb" id="crumb" aria-live="polite"><span class="crumb__k">Explorer</span><span class="crumb__v" id="crumb-v">The Solar System</span></div>
+    <button class="toggle-index" id="toggle-index" type="button" aria-expanded="false" aria-controls="index">Index</button>
+  </header>
+
+  <!-- index of every site -->
+  <nav class="index" id="index" aria-label="All artifacts">
+    <div class="index__head">
+      <p class="index__eyebrow">Abandoned but not forgotten</p>
+      <h1 class="index__title">The machines <em>we left behind</em></h1>
+      <p class="index__lede">Every piece of hardware from the challenge, plus India’s missions, in the place it rests today. Almost all of it stopped working long ago. Two Skylab repair bases, on the Moon and Mars, can fly it in, fix it and bring it back to life.</p>
+    </div>
+    <div class="index__groups" id="index-groups"></div>
+    <p class="index__note">Planet sizes and distances are not to scale. Positions on the Moon and Mars are the real landing coordinates. Data: NSSDCA &amp; NASA Science. 3D models: NASA 3D Resources. Moon: NASA SVS CGI Moon Kit. Mars: USGS Viking MDIM 2.1 mosaic. Skylab bases: concept designs built from NASA and ESA studies (Artemis south-pole regions, Fission Surface Power, VSAT, Kilopower, MOXIE, Mars Ice Home, SWIM ice maps). Built for the <a href="https://www.spaceappschallenge.org/2026/challenges/nasas-discarded-equipment-storytelling/?tab=details" target="_blank" rel="noopener">Space Apps 2026 challenge</a>.</p>
+  </nav>
+
+  <!-- detail panel -->
+  <aside class="detail" id="detail" aria-hidden="true" aria-labelledby="d-name">
+    <div class="detail__viewer">
+      <canvas id="viewer" aria-label="3D model, drag to rotate"></canvas>
+      <div class="detail__viewer-hint">Drag to rotate · scroll to zoom</div>
+      <div class="detail__loading" id="viewer-loading">Loading model…</div>
+      <button class="iconbtn detail__close" id="d-close" type="button" aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <div class="detail__body">
+      <div class="detail__tabs" id="d-tabs" role="tablist" aria-label="Hardware at this site"></div>
+      <p class="detail__site" id="d-site"></p>
+      <h2 class="detail__name" id="d-name"></h2>
+      <p class="detail__kind" id="d-kind"></p>
+      <div class="detail__status" id="d-status"></div>
+      <button class="listen" id="d-listen" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="listen__w" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg><span>Listen</span></button>
+      <div class="detail__actions" id="d-actions"></div>
+      <dl class="detail__launch" id="d-launch"></dl>
+      <p class="detail__lede" id="d-lede"></p>
+      <button class="readstory" id="d-read" type="button">
+        <span class="readstory__ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5C6.5 4 9.5 4 12 6c2.5-2 5.5-2 8-.5V19c-2.5-1.5-5.5-1.5-8 .5-2.5-2-5.5-2-8-.5z"/><path d="M12 6v13.5"/></svg></span>
+        <span class="readstory__t"><b>Read the story</b><small id="d-read-n"></small></span>
+        <svg class="readstory__go" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+      <ol class="chapters" id="d-chapters" aria-label="Chapters"></ol>
+      <dl class="detail__facts" id="d-facts"></dl>
+      <p class="detail__where" id="d-where"></p>
+      <div class="detail__nav">
+        <button class="pill" id="d-prev" type="button"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>Previous</button>
+        <button class="pill" id="d-next" type="button">Next<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- views -->
+  <div class="views" role="group" aria-label="Jump to">
+    <button type="button" data-view="overview" class="is-on">Solar System</button>
+    <button type="button" data-view="moon">Moon</button>
+    <button type="button" data-view="mars">Mars</button>
+    <button type="button" data-view="beyond">Beyond</button>
+    <button type="button" data-view="skylab" class="views__sky">Skylabs</button>
+  </div>
+  <p class="hint" id="hint">Drag to orbit · Scroll to zoom · Click a planet or a marker</p>
+
+  <!-- on the surface of the Moon or Mars -->
+  <div class="sbar" id="sbar" hidden>
+    <button class="sbar__btn" id="s-orbit" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>Back to orbit</button>
+    <label class="sbar__sun"><span>Sun</span><input type="range" id="s-sun" min="2" max="70" step="0.5" aria-label="Height of the Sun"></label>
+    <span class="sbar__hint">Drag to look · W A S D to walk · Double-click to go there</span>
+  </div>
+  <div class="shud" id="shud" hidden>
+    <div class="shud__head"><span class="shud__title"></span><span class="shud__read" id="shud-read"></span></div>
+    <p class="shud__keys"></p>
+    <div class="shud__pad">
+      <button type="button" class="shud__fly" data-key="e" aria-label="Up">Up</button>
+      <button type="button" data-key="w" aria-label="Forward"><svg viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
+      <button type="button" class="shud__fly" data-key="q" aria-label="Down">Down</button>
+      <button type="button" data-key="a" aria-label="Left"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <button type="button" data-key=" " aria-label="Brake, or land"><svg viewBox="0 0 24 24"><rect x="8" y="8" width="8" height="8" rx="1.5"/></svg></button>
+      <button type="button" data-key="d" aria-label="Right"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
+      <span></span>
+      <button type="button" data-key="s" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
+      <span></span>
+    </div>
+    <button class="pill shud__stop" type="button">Stop</button>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <!-- sound: a narrator reads every explanation; effects are synthesised live -->
+  <div class="audioctl" role="group" aria-label="Sound">
+    <button type="button" class="audioctl__btn" id="a-voice" aria-pressed="true" title="Narrator: reads every explanation aloud"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0v-5a3 3 0 0 1 3-3z"/><path d="M6 11a6 6 0 0 0 12 0M12 17v3.5"/></svg><span>Narrator</span><i class="eq" aria-hidden="true"><b></b><b></b><b></b></i></button>
+    <button type="button" class="audioctl__btn" id="a-sfx" aria-pressed="true" title="Sound effects"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="w" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/><path class="x" d="M16 9.5l5 5M21 9.5l-5 5"/></svg><span>Sound</span></button>
+  </div>
+  <!-- story mode -->
+  <div class="story" id="story" hidden role="dialog" aria-modal="true" aria-labelledby="story-mission">
+    <div class="story__stage"><div class="story__slot" id="story-slot"></div><p class="story__cap" id="story-cap"></p></div>
+    <div class="story__col">
+      <div class="story__bar">
+        <span class="story__mission" id="story-mission"></span>
+        <nav class="story__rail" id="story-rail" aria-label="Chapters"></nav>
+        <button class="iconbtn story__close" id="story-close" type="button" aria-label="Close the story"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+        <div class="story__prog"><i id="story-prog"></i></div>
+      </div>
+      <div class="story__scroll" id="story-scroll"></div>
+    </div>
+  </div>
+
+  <!-- launch films -->
+  <div class="cine" id="cine" hidden>
+    <div class="cine__bar cine__bar--t"></div><div class="cine__bar cine__bar--b"></div>
+    <div class="cine__head"><span class="cine__mission" id="cine-mission"></span><span class="cine__meta" id="cine-meta"></span></div>
+    <div class="cine__cap" id="cine-cap" aria-live="polite"><span class="cine__stamp" id="cine-stamp"></span><p class="cine__text" id="cine-text"></p></div>
+    <button class="cine__skip" id="cine-skip" type="button">Skip <span aria-hidden="true">›</span></button>
+    <div class="cine__prog"><i id="cine-prog"></i></div>
+  </div>
+  <!-- Skylab repair bay -->
+  <div class="bay" id="bay" hidden></div>
+  <div class="veil" id="veil" aria-hidden="true"><div class="loading__ring"></div><span id="veil-text"></span></div>
+
+  <div class="loading" id="loading"><div class="loading__ring"></div><span id="loading-text">Preparing the solar system…</span></div>
+
+  <script src="data.js"></script>
+  <script src="missions.js"></script>
+  <script src="skylab-data.js"></script>
+  <script type="module" src="explore.js"></script>
+</body>
+</html>
